@@ -48,9 +48,21 @@ def predict():
 def predict_text(text):
     result = predict_large_language_model_sample("hackathon23-latam-cumbiateam", "text-bison@001", 0.2, 256, 0.8, 40, '''Multi-choice problem: Define the category of the ticket?
 Categories:
+- Debt collection
+- Mortgage
+- Credit reporting
 - Credit card
-- Bank account services
-- Loans and Mortgages
+- Bank account
+- Bank service
+- Student loan
+- Credit reporting
+- Credit repair
+- Consumer Loan
+- Checking account
+- Savings account
+- Payday loan
+- Money transfers
+- Prepaid card
 
 Ticket: {0} 
 Category:
