@@ -1,6 +1,7 @@
 import vertexai
 import os
 from vertexai.preview.language_models import TextGenerationModel
+from deep_translator import GoogleTranslator
 from flask import Flask, jsonify, request
 
 app = Flask(__name__)
@@ -38,14 +39,13 @@ def info():
 
 @app.route("/predict", methods=['GET', 'POST'])
 def predict():
-    args = request.args
-    text: str | None = args.get("text")
-    if text is None and "text" in request.form:
-        text = request.form["text"]
-    if text is None:
-        text = request.json["text"]
+    text = extract_text()
     if text is None:
         return jsonify({"result": "error", "message": "No text provided"}), 400
+    return jsonify({"result": "success", "value": predict_text(text), "text": text})
+
+
+def predict_text(text):
     result = predict_large_language_model_sample("hackathon23-latam-cumbiateam", "text-bison@001", 0.2, 256, 0.8, 40, '''Multi-choice problem: Define the category of the ticket?
 Categories:
 - Credit card
@@ -55,7 +55,31 @@ Categories:
 Ticket: {0} 
 Category:
 '''.format(text), "us-central1")
-    return jsonify({"result": "success", "value": result, "text": text})
+    return result
+
+
+def extract_text():
+    args = request.args
+    text: str | None = args.get("text")
+    if text is None and "text" in request.form:
+        text = request.form["text"]
+    if text is None:
+        text = request.json["text"]
+    return text
+
+
+@app.route("/predecir", methods=['GET', 'POST'])
+def predecir():
+    translator = GoogleTranslator(source='es', target='en')
+    text_spanish = extract_text()
+    if text_spanish is None:
+        return jsonify({"result": "error", "message": "No text provided"}), 400
+    text_english = translator.translate(text_spanish)
+    result = predict_text(text_english)
+    translator = GoogleTranslator(source='en', target='es')
+    if result.text:
+        result.text = translator.translate(result.text)
+    return jsonify({"result": "success", "value": result, "text": text_spanish, "translated": text_english})
 
 
 if __name__ == "__main__":
