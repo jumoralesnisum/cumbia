@@ -63,6 +63,7 @@ Categories:
 - Payday loan
 - Money transfers
 - Prepaid card
+- Undefined
 
 Ticket: {0} 
 Category:
