@@ -1,5 +1,6 @@
 import vertexai
 import os
+import re
 from vertexai.preview.language_models import TextGenerationModel
 from deep_translator import GoogleTranslator
 from flask import Flask, jsonify, request
@@ -50,32 +51,54 @@ def predict():
     print("text is {} index is {}".format(text, index))
     result = None
     if index == 2:
-        print("TWO")
         result = predict_with_small_model(text)
     elif index == 1:
-        print("ONE")
         result = predict_text(text)
-    return jsonify({"result": "success", "value": result, "text": text})
+    elif index == 3:
+        result = predict_tuned(text)
+    return jsonify({"result": "success", "value": result, "text": text, "model": index})
+
+
+def predict_tuned(text):
+    result = predict_large_language_model_sample("hackathon23-latam-cumbiateam", "text-bison@001", 0.2, 256, 0.8, 40, '''Multi-choice problem: Define only the category of the ticket?
+    Categories: 
+- Bank account or service 
+- Checking or savings account 
+- Consumer Loan 
+- Credit card or prepaid card 
+- Credit reporting, credit repair services, or other personal consumer reports
+- Debt collection 
+- Money transfer, virtual currency, or money service
+- Mortgage
+- Other financial service 
+- Payday loan, title loan, or personal loan 
+- Student loan
+- Vehicle loan or lease 
+- Undefined
+Ticket: {0} 
+    Category:
+    '''.format(text), "us-central1", "projects/630804675018/locations/us-central1/models/5102606965113094144")
+    regexp = re.search(r"Category:[\s]*(.*)", result.text)
+    if regexp is not None:
+        result.text = regexp.groups()[0]
+    return result
 
 
 def predict_text(text):
     result = predict_large_language_model_sample("hackathon23-latam-cumbiateam", "text-bison@001", 0.2, 256, 0.8, 40, '''Multi-choice problem: Define the category of the ticket?
 Categories:
-- Debt collection
+- Bank account or service 
+- Checking or savings account 
+- Consumer Loan 
+- Credit card or prepaid card 
+- Credit reporting, credit repair services, or other personal consumer reports
+- Debt collection 
+- Money transfer, virtual currency, or money service
 - Mortgage
-- Credit reporting
-- Credit card
-- Bank account
-- Bank service
+- Other financial service 
+- Payday loan, title loan, or personal loan 
 - Student loan
-- Credit reporting
-- Credit repair
-- Consumer Loan
-- Checking account
-- Savings account
-- Payday loan
-- Money transfers
-- Prepaid card
+- Vehicle loan or lease 
 - Undefined
 
 Ticket: {0} 
@@ -112,10 +135,13 @@ def predecir():
     if index == 2:
         result = predict_with_small_model(text_spanish)
         text_english = ""
-    elif index == 1:
+    elif index == 1 or index == 3:
         translator = GoogleTranslator(source='es', target='en')
         text_english = translator.translate(text_spanish)
-        result = predict_text(text_english)
+        if index == 1:
+            result = predict_text(text_english)
+        else:
+            result = predict_tuned(text_english)
         translator = GoogleTranslator(source='en', target='es')
         if result.text:
             result.text = translator.translate(result.text)
