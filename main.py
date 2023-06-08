@@ -8,6 +8,7 @@ from google.cloud import aiplatform
 from google.cloud.aiplatform.gapic.schema import predict as gpredict
 from google.protobuf import json_format
 from google.protobuf.struct_pb2 import Value
+from utils import mappings
 
 app = Flask(__name__)
 
@@ -75,9 +76,9 @@ def predict_tuned(text):
 - Student loan
 - Vehicle loan or lease 
 - Undefined
-Ticket: {0} 
-    Category:
-    '''.format(text), "us-central1", "projects/630804675018/locations/us-central1/models/5102606965113094144")
+Ticket: {0}
+Category:''' \
+    .format(text), "us-central1", "projects/630804675018/locations/us-central1/models/5102606965113094144")
     regexp = re.search(r"Category:[\s]*(.*)", result.text)
     if regexp is not None:
         result.text = regexp.groups()[0]
@@ -100,10 +101,9 @@ Categories:
 - Student loan
 - Vehicle loan or lease 
 - Undefined
-
 Ticket: {0} 
-Category:
-'''.format(text), "us-central1")
+Category:'''\
+    .format(text), "us-central1")
     return result
 
 
@@ -145,6 +145,8 @@ def predecir():
         translator = GoogleTranslator(source='en', target='es')
         if result.text:
             result.text = translator.translate(result.text)
+    else:
+        return jsonify({"result": "error", "message": "Index not implemented. Use one of [1,2,3]"}), 400
     return jsonify({"result": "success", "value": result, "text": text_spanish, "translated": text_english})
 
 
@@ -179,7 +181,7 @@ def predict_with_small_model(text):
     confidences = dict_response.get('predictions')[0].get('confidences')
     position = confidences.index(max(confidences))
     text = dict_response.get('predictions')[0].get('displayNames')[position]
-    dict_response['text'] = text
+    dict_response['text'] = mappings(text)
     return dict_response
 
 
