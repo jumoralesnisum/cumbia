@@ -1,0 +1,25 @@
+Returns the JSON for a prediction with a text.
+---
+parameters:
+  - in: path
+    name: text
+    type: string
+    required: true
+    description: The text we want to classify from. It is supposed to be a story.
+  - in: path
+    name: index
+    type: int
+    required: false
+    description: |- 
+      The type of model we want to use for our prediction.
+      1 = Large Language Model
+      2 = Classical trained model
+      3 = Fine-tuned LLM
+responses:
+  '200':
+    description: Invocation correct
+    content:
+      application/json:
+        $ref: '#/components/schemas/prediction'
+  '400':
+    description: No text provided

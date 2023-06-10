@@ -1,0 +1,42 @@
+info:
+  title: Cumbia API
+  description: Get the category for a specific text using a classifier model.
+components:
+  schemas:
+    prediction:
+      type: Object
+      properties:
+        result:
+          type: string
+          description: What happened with the prediction
+          example: success
+          enum:
+            - success
+            - error
+        text:
+          type: string
+          description: Text we predicted with
+        value:
+          $ref: '#components/schemas/predictionvalue'
+    predictionvalue:
+      type: Object
+      required:
+        - text
+      properties:
+        text:
+          type: string
+          description: The category the user's text belongs to
+          enum:
+            - Bank account or service
+            - Checking or savings account
+            - Consumer Loan
+            - Credit card or prepaid card
+            - Credit reporting, credit repair services, or other personal consumer reports
+            - Debt collection
+            - Money transfer, virtual currency, or money service
+            - Mortgage
+            - Other financial service
+            - Payday loan, title loan, or personal loan
+            - Student loan
+            - Vehicle loan or lease
+            - Undefined

@@ -9,10 +9,9 @@ from google.cloud.aiplatform.gapic.schema import predict as gpredict
 from google.protobuf import json_format
 from google.protobuf.struct_pb2 import Value
 from utils import mappings
-
+from flasgger import Swagger, swag_from
 app = Flask(__name__)
-
-
+swagger = Swagger(app, template_file='spec.yml')
 def predict_large_language_model_sample(
         project_id: str,
         model_name: str,
@@ -40,11 +39,22 @@ def predict_large_language_model_sample(
 
 @app.route("/")
 def info():
-    return jsonify({"info": "Use the /predict endpoint with the text parameter, you sanctimonius flesh vessel"})
+    """
+    This endpoint just returns JSON directing you to /predict or /predecir
+    ---
+    responses:
+     200:
+       description: Always an informational message
+    """
+    return jsonify({"info": "Use the /predict or /predecir endpoint with the text parameter, you sanctimonius flesh vessel"})
 
 
 @app.route("/predict", methods=['GET', 'POST'])
+@swag_from('predict.yml')
 def predict():
+    """
+    Returns the JSON for a prediction with an english text
+    """
     (text, index) = extract_text()
 
     if text is None:
@@ -127,6 +137,7 @@ def extract_text():
 
 
 @app.route("/predecir", methods=['GET', 'POST'])
+@swag_from('predict.yml')
 def predecir():
     text_spanish, index = extract_text()
     if text_spanish is None:
@@ -152,6 +163,10 @@ def predecir():
 
 @app.route("/predict2", methods=['GET', 'POST'])
 def predict2():
+    """
+    Predict with a small model.
+    This is just like calling predict with index =2
+    """
     text,index = extract_text()
     if text is None:
         return jsonify({"result": "error", "message": "No text provided"}), 400
