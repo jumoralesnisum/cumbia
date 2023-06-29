@@ -4,8 +4,9 @@
 function enviar() {
     let texto = document.getElementById('texto').value
     let modo = document.getElementById('modo').value
+    let language = document.getElementById('idioma').value
     let space = document.getElementById('space')
-fetch('/predecir', {
+fetch((language=='es')?'/predecir':'/predict', {
     method: 'POST',
     headers: {
         'Content-Type': 'application/json'
@@ -14,7 +15,30 @@ fetch('/predecir', {
 })
    .then(response => response.json())
    .then(response => response.value.text)
-   .then(response => createAlert('Respuesta','Resultado de la clasificación',response, 'success', true,true,'pageMessages'))
+   .then(response => beforeAlert(response))
+}
+function traducir() {
+    translate('lbltexto', 'Cuéntenos, cómo podemos ayudarle?','How can we help you?')
+    translate('h1', 'Categorización de Información', 'Text Classification')
+    translate('textoHelp', 'Escriba aquí su historia','Tell us your story')
+    translate('explanation', 'Escriba en el formulario el texto que desea categorizar', 'Write on the form the text you want to classify')
+    translate('btnSend','Enviar','Send')
+    translate('lblMode','Modo','Mode')
+    translate('lblLang','Idioma','Language')
+    translate('opt2','Clásico','Classical')
+    translate('opt3','LLM Entrenado','Trained LLM')
+    return true
+}
+function beforeAlert(response) {
+    let language = document.getElementById('idioma').value
+    let text1= (language=='es')?'Respuesta':'Result'
+    let text2 = (language=='es')?'Resultado de la clasificación':'Classification result'
+    createAlert(text1,text2,response, 'success', true,true,'pageMessages')
+}
+function translate(id, spanish, english) {
+    let language = document.getElementById('idioma').value
+    let elem = document.getElementById(id)
+    elem.innerText = (language=='es')?spanish:english
 }
 function createAlert(title, summary, details, severity, dismissible, autoDismiss, appendToId) {
   var iconMap = {
